@@ -1,0 +1,361 @@
+openapi: 3.0.3
+info:
+  title: Auth Service API
+  description: Authentication and Session Management Service for DeepBoard.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserRequest'
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterUserResponse'
+
+  /auth/login:
+    post:
+      summary: Log in a user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginUserResponse'
+
+  /auth/logout:
+    post:
+      summary: Log out the current user
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully logged out
+
+  /auth/refresh:
+    post:
+      summary: Refresh access tokens
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokensRequest'
+      responses:
+        '200':
+          description: Tokens refreshed successfully
+
+  /auth/password/change:
+    post:
+      summary: Change user password
+      tags: [Password Management]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed successfully
+
+  /auth/password/forgot:
+    post:
+      summary: Request a password reset link
+      tags: [Password Management]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Reset email sent
+
+  /auth/password/reset:
+    post:
+      summary: Reset password using code
+      tags: [Password Management]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successfully
+
+  /auth/verify:
+    post:
+      summary: Verify account using token
+      tags: [Verification]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyAccountRequest'
+      responses:
+        '200':
+          description: Account verified
+
+  /auth/verify/resend:
+    post:
+      summary: Resend verification email
+      tags: [Verification]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+      responses:
+        '200':
+          description: Verification email resent
+
+  /auth/sessions:
+    get:
+      summary: Get list of active sessions
+      tags: [Sessions]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of sessions retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSessionsResponse'
+
+  /auth/sessions/revoke:
+    post:
+      summary: Revoke a specific session
+      tags: [Sessions]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeSessionRequest'
+      responses:
+        '200':
+          description: Session revoked
+
+  /auth/validate:
+    post:
+      summary: Validate an access token (Internal)
+      tags: [Internal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateTokenRequest'
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateTokenResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterUserRequest:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+
+    RegisterUserResponse:
+      type: object
+      required:
+        - access_token
+        - email
+        - name
+      properties:
+        access_token:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+
+    LoginUserRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    LoginUserResponse:
+      type: object
+      required:
+        - access_token
+        - email
+        - name
+      properties:
+        access_token:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - old_password
+        - new_password
+      properties:
+        old_password:
+          type: string
+        new_password:
+          type: string
+
+    VerifyAccountRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+
+    ResendVerificationRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+
+    RefreshTokensRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - code
+        - new_password
+      properties:
+        code:
+          type: string
+        new_password:
+          type: string
+
+    GetSessionsResponse:
+      type: object
+      required:
+        - sessions
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sessions'
+
+    Sessions:
+      type: object
+      required:
+        - devices_id
+        - ip
+        - user_agent
+        - last_active
+      properties:
+        devices_id:
+          type: string
+        ip:
+          type: string
+        user_agent:
+          type: string
+        last_active:
+          type: string
+
+    RevokeSessionRequest:
+      type: object
+      required:
+        - device_id
+      properties:
+        device_id:
+          type: string
+
+    ValidateTokenRequest:
+      type: object
+      required:
+        - access_token
+      properties:
+        access_token:
+          type: string
+
+    ValidateTokenResponse:
+      type: object
+      required:
+        - valid
+        - user_id
+        - email
+      properties:
+        valid:
+          type: boolean
+        user_id:
+          type: string
+        email:
+          type: string

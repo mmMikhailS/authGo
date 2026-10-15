@@ -1,0 +1,343 @@
+openapi: 3.0.3
+info:
+  title: Two-Factor Authentication (2FA) Service API
+  description: Service for managing TOTP and Email-based 2FA for DeepBoard.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /2fa/login/totp/verify:
+    post:
+      summary: Verify TOTP code during login
+      tags: [Login 2FA]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyLoginTOTPRequest'
+      responses:
+        '200':
+          description: TOTP verified, login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyLoginTOTPResponse'
+
+  /2fa/login/email/init:
+    post:
+      summary: Initialize Email 2FA verification during login
+      tags: [Login 2FA]
+      responses:
+        '200':
+          description: Email verification code sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitVerifyLoginEmail2FAResponse'
+
+  /2fa/login/email/confirm:
+    post:
+      summary: Confirm Email 2FA code during login
+      tags: [Login 2FA]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmVerifyLoginEmail2FARequest'
+      responses:
+        '200':
+          description: Email verified, login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmVerifyLoginEmail2FAResponse'
+
+  /2fa/enable/email/init:
+    post:
+      summary: Initialize enabling Email 2FA
+      tags: [Email 2FA Management]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitEnableEmail2FARequest'
+      responses:
+        '200':
+          description: Verification code sent to email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitEnableEmail2FAResponse'
+
+  /2fa/enable/email/confirm:
+    post:
+      summary: Confirm and finish enabling Email 2FA
+      tags: [Email 2FA Management]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmEnableEmail2FARequest'
+      responses:
+        '200':
+          description: Email 2FA enabled successfully
+
+  /2fa/disable/email/init:
+    post:
+      summary: Initialize disabling Email 2FA
+      tags: [Email 2FA Management]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitDisableEmail2FARequest'
+      responses:
+        '200':
+          description: Verification code sent to email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitDisableEmail2FAResponse'
+
+  /2fa/disable/email/confirm:
+    post:
+      summary: Confirm and finish disabling Email 2FA
+      tags: [Email 2FA Management]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmDisableEmail2FARequest'
+      responses:
+        '200':
+          description: Email 2FA disabled successfully
+
+  /2fa/enable/totp/init:
+    post:
+      summary: Initialize TOTP setup (get secret)
+      tags: [TOTP Management]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitEnableTOTPRequest'
+      responses:
+        '200':
+          description: TOTP secret and URL generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitEnableTOTPResponse'
+
+  /2fa/enable/totp/confirm:
+    post:
+      summary: Confirm and finish enabling TOTP
+      tags: [TOTP Management]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyLoginTOTPRequest'
+      responses:
+        '200':
+          description: TOTP enabled successfully, recovery codes provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnableTOTPResponse'
+
+  /2fa/disable/totp:
+    post:
+      summary: Disable TOTP
+      tags: [TOTP Management]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyLoginTOTPRequest'
+      responses:
+        '200':
+          description: TOTP disabled successfully
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    VerifyLoginTOTPRequest:
+      type: object
+      required:
+        - otp
+      properties:
+        otp:
+          type: string
+          description: The 6-digit code from the authenticator app
+
+    VerifyLoginTOTPResponse:
+      type: object
+      required:
+        - access_token
+        - email
+        - name
+      properties:
+        access_token:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+
+    InitVerifyLoginEmail2FAResponse:
+      type: object
+      required:
+        - otp_id
+        - expires_at
+      properties:
+        otp_id:
+          type: string
+        expires_at:
+          type: string
+
+    ConfirmVerifyLoginEmail2FARequest:
+      type: object
+      required:
+        - otp_id
+        - code
+      properties:
+        otp_id:
+          type: string
+        code:
+          type: string
+
+    ConfirmVerifyLoginEmail2FAResponse:
+      type: object
+      required:
+        - access_token
+        - name
+        - email
+      properties:
+        access_token:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+
+    InitEnableEmail2FARequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+
+    InitEnableEmail2FAResponse:
+      type: object
+      required:
+        - otp_id
+        - expires_at
+      properties:
+        otp_id:
+          type: string
+        expires_at:
+          type: string
+
+    ConfirmEnableEmail2FARequest:
+      type: object
+      required:
+        - otp_id
+        - code
+      properties:
+        otp_id:
+          type: string
+        code:
+          type: string
+
+    InitDisableEmail2FARequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+
+    InitDisableEmail2FAResponse:
+      type: object
+      required:
+        - otp_id
+        - expires_at
+      properties:
+        otp_id:
+          type: string
+        expires_at:
+          type: string
+
+    ConfirmDisableEmail2FARequest:
+      type: object
+      required:
+        - otp_id
+        - code
+      properties:
+        otp_id:
+          type: string
+        code:
+          type: string
+
+    EnableTOTPResponse:
+      type: object
+      required:
+        - recovery_codes
+      properties:
+        recovery_codes:
+          type: array
+          items:
+            type: string
+
+    InitEnableTOTPRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+
+    InitEnableTOTPResponse:
+      type: object
+      required:
+        - secret_url
+        - secret_key
+      properties:
+        secret_url:
+          type: string
+          description: otpauth:// URL for QR codes
+        secret_key:
+          type: string
+          description: Plain text secret key

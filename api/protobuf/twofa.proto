@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package twofa;
+
+option go_package = "github.com/mmMikhailS/DeepBoard/internal/common/twofa";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service TwofaService {
+  rpc VerifyLoginTOTP(VerifyLoginTOTPRequest) returns (VerifyLoginTOTPResponse);
+  
+  rpc InitVerifyLoginEmail2FA(google.protobuf.Empty) returns (InitVerifyLoginEmail2FAResponse);
+  rpc ConfirmVerifyLoginEmail2FA(ConfirmVerifyLoginEmail2FARequest) returns (ConfirmVerifyLoginEmail2FAResponse);
+  
+  rpc InitEnableEmail2FA(InitEnableEmail2FARequest) returns (InitEnableEmail2FAResponse);
+  rpc ConfirmEnableEmail2FA(ConfirmEnableEmail2FARequest) returns (google.protobuf.Empty);
+
+  rpc InitDisableEmail2FA(InitDisableEmail2FARequest) returns (InitDisableEmail2FAResponse);
+  rpc ConfirmDisableEmail2FA(ConfirmDisableEmail2FARequest) returns (google.protobuf.Empty);
+
+  rpc InitEnableTOTP(InitEnableTOTPRequest) returns (InitEnableTOTPResponse);
+  rpc ConfirmEnableTOTP(VerifyLoginTOTPRequest) returns (EnableTOTPResponse);
+  rpc DisableTOTP(VerifyLoginTOTPRequest) returns (google.protobuf.Empty);
+}
+
+message VerifyLoginTOTPRequest {
+  string otp = 1;
+}
+message VerifyLoginTOTPResponse {
+  string access_token = 1;
+  string email = 2;
+  string name = 3;
+}
+
+message InitVerifyLoginEmail2FAResponse {
+  string otp_id = 1;
+  google.protobuf.Timestamp expires_at = 2;
+}
+
+message ConfirmVerifyLoginEmail2FARequest {
+  string otp_id = 1;
+  string code = 2;
+}
+
+message ConfirmVerifyLoginEmail2FAResponse {
+  string access_token = 1;
+  string name = 2;
+  string email = 3;
+}
+
+message InitEnableEmail2FARequest {
+  string password = 1;
+}
+message InitEnableEmail2FAResponse {
+  string otp_id = 1;
+  google.protobuf.Timestamp expires_at = 2;
+}
+
+message ConfirmEnableEmail2FARequest {
+  string otp_id = 1;
+  string code = 2;
+}
+
+message InitDisableEmail2FARequest {
+  string password = 1;
+}
+message InitDisableEmail2FAResponse {
+  string otp_id = 1;
+  google.protobuf.Timestamp expires_at = 2;
+}
+
+message ConfirmDisableEmail2FARequest {
+  string otp_id = 1;
+  string code = 2;
+}
+
+message EnableTOTPResponse {
+  repeated string recovery_codes = 1;
+}
+
+message DisableTOTPRequest {
+  string otp = 1;
+}
+
+message InitEnableTOTPRequest {
+  string password = 1;
+}
+
+message InitEnableTOTPResponse {
+  string secret_url = 1;
+  string secret_key = 2;
+}

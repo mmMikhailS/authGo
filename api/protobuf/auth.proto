@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/mmMikhailS/DeepBoard/internal/common/user;auth";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service AuthService {
+  rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse);
+  rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
+  rpc Logout(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc RefreshTokens(RefreshTokensRequest) returns (google.protobuf.Empty);
+
+  rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty);
+  rpc ForgotPassword(ForgotPasswordRequest) returns (google.protobuf.Empty);
+  rpc ResetPassword(ResetPasswordRequest) returns (google.protobuf.Empty);
+
+  rpc VerifyAccount(VerifyAccountRequest) returns (google.protobuf.Empty);
+  rpc ResendVerification(ResendVerificationRequest) returns (google.protobuf.Empty);
+
+  rpc GetSessions(google.protobuf.Empty) returns (GetSessionsResponse);
+  rpc RevokeSession(RevokeSessionRequest) returns (google.protobuf.Empty);
+
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
+message RegisterUserRequest {
+  string email = 1;
+  string password = 2;
+  string name = 3;
+}
+
+message RegisterUserResponse {
+  string access_token = 1;
+  string email = 2;
+  string name = 3;
+}
+
+message LoginUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginUserResponse {
+  string access_token = 1;
+  string email = 2;
+  string name = 3;
+}
+
+message ChangePasswordRequest {
+  string old_password = 1;
+  string new_password = 2;
+}
+
+message VerifyAccountRequest {
+  string token = 1;
+}
+
+message ResendVerificationRequest {
+  string email = 1;
+}
+
+message RefreshTokensRequest {
+  string refresh_token = 1;
+}
+
+message ForgotPasswordRequest {
+  string email = 1;
+}
+
+message ResetPasswordRequest {
+  string code = 1;
+  string new_password = 2;
+}
+
+message GetSessionsResponse {
+  repeated Sessions sessions = 1;
+}
+
+message Sessions {
+  string devices_id = 1;
+  string ip = 2;
+  string user_agent = 3;
+  google.protobuf.Timestamp last_active = 4;
+}
+
+message RevokeSessionRequest {
+  string device_id = 1;
+}
+
+message ValidateTokenRequest {
+  string access_token = 1;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+  string user_id = 2;
+  string email = 3;
+}

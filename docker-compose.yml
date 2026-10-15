@@ -1,0 +1,9 @@
+name: "deep-board"
+services:
+  PostgreSQL:
+    image: postgres:15-alpine
+    env_file:
+      - .env
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
